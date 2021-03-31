@@ -3,6 +3,7 @@ channels:
   - pytorch
   - defaults
 dependencies:
+  - ipykernel # necessary for colab
   - _libgcc_mutex=0.1=main
   - blas=1.0=mkl
   - bzip2=1.0.8=h7b6447c_0
