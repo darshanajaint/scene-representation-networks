@@ -105,7 +105,7 @@ class SceneClassDataset(torch.utils.data.Dataset):
         print(os.path.join(root_dir, "*/"))
         self.instance_dirs = sorted(glob(os.path.join(root_dir, "*/")))
         print(self.instance_dirs)
-
+        print(f'NumInstances {len(self.instance_dirs)}')
         assert (len(self.instance_dirs) != 0), "No objects in the data directory"
 
         if max_num_instances != -1:
