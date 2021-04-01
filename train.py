@@ -188,6 +188,8 @@ def train():
         # Loops over epochs.
         while True:
             for model_input, ground_truth in train_dataloader:
+                print(type(model_input), type(ground_truth))
+
                 model_outputs = model(model_input)
 
                 optimizer.zero_grad()
