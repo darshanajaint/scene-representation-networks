@@ -88,6 +88,7 @@ opt = p.parse_args()
 
 
 def train():
+    print("HERE")
     # Parses indices of specific observations from comma-separated list.
     if opt.specific_observation_idcs is not None:
         specific_observation_idcs = util.parse_comma_separated_integers(opt.specific_observation_idcs)
@@ -263,7 +264,9 @@ def train():
 
 
 def main():
+    print("Begin Training")
     train()
+    print("End Training")
 
 
 if __name__ == '__main__':
