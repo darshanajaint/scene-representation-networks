@@ -204,6 +204,7 @@ class SRNsModel(nn.Module):
 
         batch_size, num_samples, _ = predictions.shape
 
+        print("SRN WRITE UPDATES")
         # Module"s own log
         for type, name, content, every_n in self.logs:
             name = prefix + name

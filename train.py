@@ -215,7 +215,7 @@ def train():
                 print("Iter %07d   Epoch %03d   L_img %0.4f   L_latent %0.4f   L_depth %0.4f" %
                       (iter, epoch, weighted_dist_loss, weighted_latent_loss, weighted_reg_loss))
 
-                model.write_updates(writer, model_outputs, ground_truth, iter)
+               # model.write_updates(writer, model_outputs, ground_truth, iter)
                 writer.add_scalar("scaled_distortion_loss", weighted_dist_loss, iter)
                 writer.add_scalar("scaled_regularization_loss", weighted_reg_loss, iter)
                 writer.add_scalar("scaled_latent_loss", weighted_latent_loss, iter)
@@ -238,7 +238,7 @@ def train():
                             ssims.append(ssim)
                             dist_losses.append(dist_loss)
 
-                            model.write_updates(writer, model_outputs, ground_truth, iter, prefix='val_')
+                           # model.write_updates(writer, model_outputs, ground_truth, iter, prefix='val_')
 
                         writer.add_scalar("val_dist_loss", np.mean(dist_losses), iter)
                         writer.add_scalar("val_psnr", np.mean(psnrs), iter)
