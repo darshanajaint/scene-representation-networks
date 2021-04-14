@@ -124,9 +124,12 @@ class Raymarcher(nn.Module):
             depths.append(depth)
 
         if not self.counter % 100:
+            print("About to write tensorboard summaries")
             # Write tensorboard summary for each step of ray-marcher.
             drawing_depths = torch.stack(depths, dim=0)[:, 0, :, :]
+            print("Stacked depths")
             drawing_depths = util.lin2img(drawing_depths).repeat(1, 3, 1, 1)
+            print("Called util.lin2img on drawing_depths")
             # log.append(('image', 'raycast_progress',
             #             torch.clamp(torchvision.utils.make_grid(
             #            drawing_depths, scale_each=False, normalize=True), 0.0,
@@ -136,6 +139,7 @@ class Raymarcher(nn.Module):
             # Visualize residual step distance (i.e., the size of the final step)
             fig = util.show_images([util.lin2img(signed_distance)[i, :, :, :].detach().cpu().numpy().squeeze()
                                     for i in range(batch_size)])
+            print("Called util.show_images on util.lin2img on signed distance")
             # log.append(('figure', 'stopping_distances', fig, 100))
         self.counter += 1
 
