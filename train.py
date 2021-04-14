@@ -193,7 +193,6 @@ def train():
                 print(type(model_input), type(ground_truth))
 
                 model_outputs = model(model_input)
-                print("Finished forward through model")
 
                 optimizer.zero_grad()
 
@@ -208,7 +207,6 @@ def train():
                 total_loss = (weighted_dist_loss
                               + weighted_reg_loss
                               + weighted_latent_loss)
-                print("Finished calculating loss")
                 total_loss.backward()
 
                 optimizer.step()

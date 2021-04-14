@@ -285,6 +285,7 @@ class SRNsModel(nn.Module):
                                                        intrinsics=intrinsics,
                                                        uv=uv,
                                                        phi=phi)
+        print("Finished with ray marcher")
         self.logs.extend(log)
 
         # Sapmle phi a last time at the final ray-marched world coordinates.
