@@ -88,7 +88,6 @@ opt = p.parse_args()
 
 
 def train():
-    print("HERE")
     # Parses indices of specific observations from comma-separated list.
     if opt.specific_observation_idcs is not None:
         specific_observation_idcs = util.parse_comma_separated_integers(opt.specific_observation_idcs)
@@ -189,6 +188,7 @@ def train():
 
         # Loops over epochs.
         while True:
+            print("Epoch", iter)
             for model_input, ground_truth in train_dataloader:
                 print(type(model_input), type(ground_truth))
 
