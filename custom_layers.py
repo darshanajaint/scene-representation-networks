@@ -140,7 +140,6 @@ class Raymarcher(nn.Module):
             # fig = util.show_images([util.lin2img(signed_distance)[i, :, :,
             # :].detach().cpu().numpy().squeeze()
             #                         for i in range(batch_size)])
-            print("Called util.show_images on util.lin2img on signed distance")
             # log.append(('figure', 'stopping_distances', fig, 100))
         self.counter += 1
 
