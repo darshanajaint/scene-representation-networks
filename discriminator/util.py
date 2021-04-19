@@ -9,8 +9,8 @@ from pickle import dump
 
 def get_transform():
     return transforms.Compose([
-        transforms.ToPILImage(),
         transforms.Resize((224, 224)),
+        transforms.ToPILImage(),
         transforms.ToTensor()
     ])
 
