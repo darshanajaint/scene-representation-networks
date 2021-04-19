@@ -129,9 +129,13 @@ def set_up_generator():
                          overwrite_embeddings=False)
 
     ckpt_dir = os.path.join(opt.logging_root, 'checkpoints')
+    models_dir = os.path.join(ckpt_dir, 'models')
+    results_dir = os.path.join(ckpt_dir, 'results')
 
     util.cond_mkdir(opt.logging_root)
     util.cond_mkdir(ckpt_dir)
+    util.cond_mkdir(models_dir)
+    util.cond_mkdir(results_dir)
 
     # Save command-line parameters log directory.
     with open(os.path.join(opt.logging_root, "params.txt"),
@@ -154,14 +158,19 @@ def set_up_discriminator(device):
 
 
 def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
-    path = os.path.join(path, 'iter_%04d.pth' % iter)
-    state = {
+    models_path = os.path.join(path, 'models/iter_%06d.pth' % iter)
+    models = {
         'discriminator': disc.model.state_dict(),
-        'discriminator_results': disc_results,
-        'generator': gen.state_dict(),
-        'generator_loss': gen_loss
+        'generator': gen.state_dict()
     }
-    torch.save(state, path)
+    torch.save(models, models_path)
+
+    results_path = os.path.join(path, 'results/iter_%6d.pth' % iter)
+    results = {
+        'discriminator': disc_results,
+        'generator': gen_loss
+    }
+    torch.save(results, results_path)
 
 
 def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
@@ -200,10 +209,11 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
         batch_iter = 0
         for generator_input, ground_truth in samples:
             generator_output = generator(generator_input)
-            print("batch_iter {:d}, predictions:".format(batch_iter), end=" ")
+            # print("batch_iter {:d}, predictions:".format(batch_iter), end=" ")
             output_imgs = generator.get_output_img(generator_output)
 
-            print("batch_iter {:d}, ground truth:".format(batch_iter), end=" ")
+            # print("batch_iter {:d}, ground truth:".format(batch_iter),
+            # end=" ")
             true_imgs = util.lin2img(ground_truth['rgb'])
             fakes += list(output_imgs.detach().cpu().numpy())
             reals += list(true_imgs.detach().cpu().numpy())

@@ -64,12 +64,12 @@ class ModelUtil:
             fake = fake.to(self.device)
 
             print("Calling self.model(real), ", real.shape)
-            # real_output = self.model(real)
+            real_output = self.model(real)
 
             print("Calling self.model(fake), ", fake.shape)
-            # fake_output = self.model(fake)
-            # loss = self.get_gan_loss(real_output, fake_output)
-            '''
+            fake_output = self.model(fake)
+            loss = self.get_gan_loss(real_output, fake_output)
+
             if train:
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -79,7 +79,6 @@ class ModelUtil:
             fake_preds.extend((fake_output.cpu().numpy() >= 0.5).float)
             loss_epoch += loss.item()
             num_batches += 1
-            '''
 
         loss_per_batch = loss_epoch / num_batches
         total_accuracy = accuracy_score(
@@ -93,7 +92,6 @@ class ModelUtil:
     def train(self, reals, fakes):
         val_size = math.floor(len(reals) * self.val_proportion)
         train = self._get_data_loader(reals[:-val_size], fakes[:-val_size])
-        return
         val = self._get_data_loader(reals[-val_size:], fakes[-val_size:])
 
         self.set_train()

@@ -144,7 +144,7 @@ class SRNsModel(nn.Module):
 
     def set_discriminator(self, discriminator):
         self.discriminator = discriminator
-        for param in self.discriminator.parameters():
+        for param in self.discriminator.model.parameters():
             param.requires_grad = False
 
     def get_psnr(self, prediction, ground_truth):
