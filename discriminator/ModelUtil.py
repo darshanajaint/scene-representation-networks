@@ -5,7 +5,7 @@ import numpy as np
 from torch.nn import BCEWithLogitsLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from ImageDataset import ImageDataset
+from discriminator.ImageDataset import ImageDataset
 from sklearn.metrics import accuracy_score, balanced_accuracy_score
 
 
