@@ -37,9 +37,9 @@ class ModelUtil:
 
     def _get_data_loader(self, reals, fakes):
         print("Creating data loader, reals shape:", reals[0].shape)
-        reals = torch.from_numpy(np.concatenate(reals))
+        reals = torch.from_numpy(np.stack(reals))
         print("Now in tensor form, reals shape:", reals.shape)
-        fakes = torch.from_numpy(np.concatenate(fakes))
+        fakes = torch.from_numpy(np.stack(fakes))
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=True)
         return data_loader
