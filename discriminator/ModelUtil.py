@@ -75,8 +75,8 @@ class ModelUtil:
                 loss.backward()
                 self.optimizer.step()
 
-            real_preds.extend((real_output.cpu().numpy() >= 0.5).float)
-            fake_preds.extend((fake_output.cpu().numpy() >= 0.5).float)
+            real_preds.extend((real_output.detach().cpu().numpy() >= 0.5).float)
+            fake_preds.extend((fake_output.detach().cpu().numpy() >= 0.5).float)
             loss_epoch += loss.item()
             num_batches += 1
 
