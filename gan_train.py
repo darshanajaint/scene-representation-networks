@@ -93,8 +93,10 @@ p.add_argument('--embedding_size', type=int, default=256,
                help='Dimensionality of latent embedding.')
 
 # GAN Options
-p.add_argument('--num_instances', type=int, default=100,
-               help='Number of objects to select from.')
+p.add_argument('--num_instances', type=int, default=1000,
+               help='Number of instances that the model was trained with.')
+p.add_argument('--batch_num_instances', type=int, default=100,
+               help='Number of objects to train on.')
 p.add_argument('--num_observations', type=int, default=17,
                help='Number of observations per object to use.')
 p.add_argument('--model_type', type=str,
@@ -180,7 +182,7 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
         samples = dataio.SceneClassDataset.generate_batch(
             data_root=opt.data_root,
             num_observations=opt.num_observations,
-            num_instances=opt.num_instances,
+            num_instances=opt.batch_num_instances,
             img_sidelength=opt.img_sidelengths,
         )
 
