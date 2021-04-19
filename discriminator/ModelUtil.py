@@ -76,9 +76,9 @@ class ModelUtil:
                 self.optimizer.step()
 
             real_preds.extend((real_output.detach().cpu().numpy() >=
-                               0.5).float())
+                               0.5).astype('float'))
             fake_preds.extend((fake_output.detach().cpu().numpy() >=
-                               0.5).float())
+                               0.5).astype('float'))
             loss_epoch += loss.item()
             num_batches += 1
 
