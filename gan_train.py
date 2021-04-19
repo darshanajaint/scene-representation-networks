@@ -227,7 +227,7 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
         # Generator training
         gen_optimizer.zero_grad()
         generator.set_discriminator(discriminator)
-        gen_loss = generator.get_gan_loss(torch.Tensor(fakes))
+        gen_loss = generator.get_gan_loss(fakes)
         gen_loss.backward()
         gen_optimizer.step()
 
