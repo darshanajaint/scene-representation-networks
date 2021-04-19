@@ -67,7 +67,7 @@ class ModelUtil:
 
             if train:
                 self.optimizer.zero_grad()
-                loss.backward()
+                loss.backward(retain_graph=True)
                 self.optimizer.step()
 
             real_preds.extend((real_output.detach().cpu().numpy() >=
