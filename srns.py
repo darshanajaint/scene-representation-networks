@@ -139,7 +139,7 @@ class SRNsModel(nn.Module):
         """
         m = float(len(fakes))
         minus_pred = [1 - pred for pred in self.discriminator.predict(fakes)]
-        loss = 1 / m * torch.sum(torch.log2(minus_pred))
+        loss = 1 / m * torch.sum(torch.log2(torch.Tensor(minus_pred)))
         return loss
 
     def set_discriminator(self, discriminator):
