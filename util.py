@@ -83,7 +83,6 @@ def parse_intrinsics(filepath, trgt_sidelength=None, invert_y=False):
 
 def lin2img(tensor):
     batch_size, num_samples, channels = tensor.shape
-    print(batch_size, num_samples, channels, end='\n')
     sidelen = np.sqrt(num_samples).astype(int)
     return tensor.permute(0, 2, 1).view(batch_size, channels, sidelen, sidelen)
 

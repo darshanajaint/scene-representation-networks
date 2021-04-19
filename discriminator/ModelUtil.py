@@ -36,9 +36,7 @@ class ModelUtil:
         self.criterion = self.criterion.to(device)
 
     def _get_data_loader(self, reals, fakes, shuffle=True):
-        print("Creating data loader, reals shape:", reals[0].shape)
         reals = torch.from_numpy(np.stack(reals))
-        print("Now in tensor form, reals shape:", reals.shape)
         fakes = torch.from_numpy(np.stack(fakes))
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=shuffle)
@@ -63,10 +61,7 @@ class ModelUtil:
             real = real.to(self.device)
             fake = fake.to(self.device)
 
-            print("Calling self.model(real), ", real.shape)
             real_output = self.model(real)
-
-            print("Calling self.model(fake), ", fake.shape)
             fake_output = self.model(fake)
             loss = self.get_gan_loss(real_output, fake_output)
 

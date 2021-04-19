@@ -147,7 +147,7 @@ def set_up_generator():
     with open(os.path.join(opt.logging_root, "model.txt"), "w") as out_file:
         out_file.write(str(model))
 
-    return model, ckpt_dir
+    return model, models_dir, results_dir
 
 
 def set_up_discriminator(device):
@@ -157,15 +157,16 @@ def set_up_discriminator(device):
     return model
 
 
-def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
-    models_path = os.path.join(path, 'models/iter_%06d.pth' % iter)
+def checkpoint(models_dir, results_dir, iter, disc, disc_results, gen,
+               gen_loss):
+    models_path = os.path.join(models_dir, 'iter_%06d.pth' % iter)
     models = {
         'discriminator': disc.model.state_dict(),
         'generator': gen.state_dict()
     }
     torch.save(models, models_path)
 
-    results_path = os.path.join(path, 'results/iter_%6d.pth' % iter)
+    results_path = os.path.join(results_dir, 'iter_%6d.pth' % iter)
     results = {
         'discriminator': disc_results,
         'generator': gen_loss
@@ -174,7 +175,7 @@ def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
 
 
 def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
-                 ckpt_dir):
+                 models_dir, results_dir):
     generator.train()
     generator.cuda()
     for iter in range(start, num_iterations):
@@ -209,17 +210,11 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
         batch_iter = 0
         for generator_input, ground_truth in samples:
             generator_output = generator(generator_input)
-            # print("batch_iter {:d}, predictions:".format(batch_iter), end=" ")
             output_imgs = generator.get_output_img(generator_output)
-
-            # print("batch_iter {:d}, ground truth:".format(batch_iter),
-            # end=" ")
             true_imgs = util.lin2img(ground_truth['rgb'])
             fakes += list(output_imgs.detach().cpu().numpy())
             reals += list(true_imgs.detach().cpu().numpy())
             batch_iter += 1
-
-        print("Finished generating images")
 
         # Discriminator training
         disc_res = discriminator.train(reals, fakes)
@@ -231,17 +226,17 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
         gen_loss.backward()
         gen_optimizer.step()
 
-        checkpoint(ckpt_dir, iter, discriminator, disc_res, generator,
-                   gen_loss.item())
+        checkpoint(models_dir, results_dir, iter, discriminator, disc_res,
+                   generator, gen_loss.item())
 
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     discriminator = set_up_discriminator(device)
-    generator, ckpt_dir = set_up_generator()
+    generator, models_dir, results_dir = set_up_generator()
     optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
     gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
-                 optimizer, ckpt_dir)
+                 optimizer, models_dir, results_dir)
 
 
 if __name__ == "__main__":
