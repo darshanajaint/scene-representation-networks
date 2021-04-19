@@ -18,8 +18,8 @@ class ImageDataset(Dataset):
 
         self.img_list = []
         for i in range(len(self.reals)):
-            real = self.transform(self.reals[i])
-            fake = self.transform(self.fakes[i])
+            real = self.transform(self.reals[i]) / 255.0
+            fake = self.transform(self.fakes[i]) / 255.0
             self.img_list.append([real, fake])
 
     def __len__(self):
