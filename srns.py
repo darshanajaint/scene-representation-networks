@@ -137,9 +137,11 @@ class SRNsModel(nn.Module):
         """
         Computes GAN loss on this model.
         """
-        m = float(len(fakes))
-        minus_pred = [1 - pred for pred in self.discriminator.predict(fakes)]
-        loss = 1 / m * torch.sum(torch.log2(torch.Tensor(minus_pred)))
+        fakes = np.concatenate(fakes)
+        m = len(fakes)
+        ones = torch.from_numpy(np.ones(shape=fakes.shape))
+        minus_pred = torch.subtract(ones, torch.from_numpy(fakes))
+        loss = 1 / m * torch.sum(torch.log2(minus_pred))
         return loss
 
     def set_discriminator(self, discriminator):

@@ -159,14 +159,14 @@ def set_up_discriminator(device):
 
 def checkpoint(models_dir, results_dir, iter, disc, disc_results, gen,
                gen_loss):
-    models_path = os.path.join(models_dir, 'iter_%06d.pth' % iter)
+    models_path = models_dir + '/iter_{:06d}.pth'.format(iter)
     models = {
         'discriminator': disc.model.state_dict(),
         'generator': gen.state_dict()
     }
     torch.save(models, models_path)
 
-    results_path = os.path.join(results_dir, 'iter_%6d.pth' % iter)
+    results_path = results_dir + '/iter_{:06d}.pth'.format(iter)
     results = {
         'discriminator': disc_results,
         'generator': gen_loss
