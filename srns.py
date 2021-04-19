@@ -133,13 +133,13 @@ class SRNsModel(nn.Module):
 
         return self.latent_reg_loss
 
-    def get_gan_loss(self, prediction):
+    def get_gan_loss(self, fakes):
         """
         Computes GAN loss on this model.
         """
-        m = float(len(prediction))
-        loss = 1 / m * torch.sum(torch.log2(1 - self.discriminator.predict(
-            prediction)))
+        m = float(len(fakes))
+        minus_pred = [1 - pred for pred in self.discriminator.predict(fakes)]
+        loss = 1 / m * torch.sum(torch.log2(minus_pred))
         return loss
 
     def set_discriminator(self, discriminator):
