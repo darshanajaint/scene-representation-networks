@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import Dataset
 
 
@@ -18,8 +19,8 @@ class ImageDataset(Dataset):
 
         self.img_list = []
         for i in range(len(self.reals)):
-            real = self.transform(self.reals[i])
-            fake = self.transform(self.fakes[i])
+            real = self.transform(self.reals[i].to(torch.uint8))
+            fake = self.transform(self.fakes[i].to(torch.uint8))
             self.img_list.append([real, fake])
 
     def __len__(self):
