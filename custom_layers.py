@@ -133,9 +133,10 @@ class Raymarcher(nn.Module):
                         100))
 
             # Visualize residual step distance (i.e., the size of the final step)
-            fig = util.show_images([util.lin2img(signed_distance)[i, :, :, :].detach().cpu().numpy().squeeze()
-                                    for i in range(batch_size)])
-            log.append(('figure', 'stopping_distances', fig, 100))
+            # fig = util.show_images([util.lin2img(signed_distance)[i, :, :,
+            # :].detach().cpu().numpy().squeeze()
+            #                         for i in range(batch_size)])
+            # log.append(('figure', 'stopping_distances', fig, 100))
         self.counter += 1
 
         return world_coords[-1], depths[-1], log

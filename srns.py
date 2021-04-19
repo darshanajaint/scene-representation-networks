@@ -234,12 +234,13 @@ class SRNsModel(nn.Module):
             rgb_loss = ((predictions.float().cuda() - trgt_imgs.float().cuda()) ** 2).mean(dim=2, keepdim=True)
             rgb_loss = util.lin2img(rgb_loss)
 
-            fig = util.show_images([rgb_loss[i].detach().cpu().numpy().squeeze()
-                                    for i in range(batch_size)])
-            writer.add_figure(prefix + "rgb_error_fig",
-                              fig,
-                              iter,
-                              close=True)
+            # fig = util.show_images([rgb_loss[i].detach().cpu().numpy(
+            # ).squeeze()
+            #                         for i in range(batch_size)])
+            # writer.add_figure(prefix + "rgb_error_fig",
+            #                   fig,
+            #                   iter,
+            #                   close=True)
 
             depth_maps_plot = util.lin2img(depth_maps)
             writer.add_image(prefix + "pred_depth",
