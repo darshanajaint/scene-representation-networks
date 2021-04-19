@@ -127,16 +127,16 @@ class ModelUtil:
 
         proba_list = []
         pred_list = []
-        with torch.no_grad():
-            for image, _ in data_loader:
-                image = image.to(self.device)
+        # with torch.no_grad():
+        for image, _ in data_loader:
+            image = image.to(self.device)
 
-                output = self.model(image)
-                # output = output.cpu().numpy()
+            output = self.model(image)
+            # output = output.cpu().numpy()
 
-                proba_list += list(output)
+            proba_list += list(output)
 
-                output = (output >= 0.5).float()
-                pred_list += list(output)
+            output = (output >= 0.5).float()
+            pred_list += list(output)
 
         return proba_list, pred_list
