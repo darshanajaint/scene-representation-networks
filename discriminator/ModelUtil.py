@@ -132,7 +132,7 @@ class ModelUtil:
                 image = image.to(self.device)
 
                 output = self.model(image)
-                output = output.cpu().numpy()
+                # output = output.cpu().numpy()
 
                 proba_list += list(output)
 
