@@ -99,6 +99,8 @@ p.add_argument('--num_observations', type=int, default=17,
                help='Number of observations per object to use.')
 p.add_argument('--model_type', type=str,
                help='One of "mobilenet", "resnet", and "googlenet".')
+p.add_argument('--gan_iterations', type=int, default=100000)
+p.add_argument('--gan_start', type=int, default=0)
 
 
 opt = p.parse_args()
@@ -160,11 +162,11 @@ def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
     torch.save(state, path)
 
 
-def gan_training(num_iterations, discriminator, generator, gen_optimizer,
+def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
                  ckpt_dir):
     generator.train()
     generator.cuda()
-    for iter in range(num_iterations):
+    for iter in range(start, num_iterations):
         # sample images from test set
         # generate fakes for sample images - fakes = gen_model(samples)
         # discrim_preds = discrim_model([samples, fakes, labels])
@@ -218,8 +220,8 @@ def main():
     discriminator = set_up_discriminator(device)
     generator, ckpt_dir = set_up_generator()
     optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
-    gan_training(opt.gan_iterations, discriminator, generator, optimizer,
-                 ckpt_dir)
+    gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
+                 optimizer, ckpt_dir)
 
 
 if __name__ == "__main__":
