@@ -92,6 +92,15 @@ p.add_argument('--use_unet_renderer', action='store_true',
 p.add_argument('--embedding_size', type=int, default=256,
                help='Dimensionality of latent embedding.')
 
+# GAN Options
+p.add_argument('--num_instances', type=int, default=100,
+               help='Number of objects to select from.')
+p.add_argument('--num_observations', type=int, default=17,
+               help='Number of observations per object to use.')
+p.add_argument('--model_type', type=str,
+               help='One of "mobilenet", "resnet", and "googlenet".')
+
+
 opt = p.parse_args()
 
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from torchvision import transforms
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, precision_score, recall_score
-from models import MobileNetModel, ResNetModel, GoogLeNetModel
+from discriminator.models import MobileNetModel, ResNetModel, GoogLeNetModel
 from pickle import dump
 
 
