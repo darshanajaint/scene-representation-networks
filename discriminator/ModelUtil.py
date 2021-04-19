@@ -136,7 +136,7 @@ class ModelUtil:
 
                 proba_list += list(output)
 
-                output = (output >= 0.5).astype('float')
+                output = (output >= 0.5).float()
                 pred_list += list(output)
 
         return proba_list, pred_list
