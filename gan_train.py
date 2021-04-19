@@ -205,29 +205,34 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
             pin_memory=opt.preload
         )
 
-        fakes = []
-        reals = []
+        # fakes = []
+        # reals = []
         batch_iter = 0
+        running_loss = 0
+        disc_res = {}
         for generator_input, ground_truth in samples:
             generator_output = generator(generator_input)
             output_imgs = generator.get_output_img(generator_output)
             true_imgs = util.lin2img(ground_truth['rgb'])
-            fakes += list(output_imgs)  # .detach().cpu().numpy())
-            reals += list(true_imgs)  # .detach().cpu().numpy())
+            fakes = output_imgs
+            # += list(output_imgs)  # .detach().cpu().numpy())
+            reals = true_imgs  # += list(true_imgs)  # .detach().cpu().numpy())
+
+            # Discriminator training
+            disc_res = discriminator.train(reals, fakes)
+
+            # Generator training
+            gen_optimizer.zero_grad()
+            generator.set_discriminator(discriminator)
+            gen_loss = generator.get_gan_loss(fakes)
+            gen_loss.backward()
+            gen_optimizer.step()
+
+            running_loss += gen_loss.item()
             batch_iter += 1
 
-        # Discriminator training
-        disc_res = discriminator.train(reals, fakes)
-
-        # Generator training
-        gen_optimizer.zero_grad()
-        generator.set_discriminator(discriminator)
-        gen_loss = generator.get_gan_loss(fakes)
-        gen_loss.backward()
-        gen_optimizer.step()
-
         checkpoint(models_dir, results_dir, iter, discriminator, disc_res,
-                   generator, gen_loss.item())
+                   generator, running_loss / batch_iter)
 
 
 def main():

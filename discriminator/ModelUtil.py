@@ -36,8 +36,8 @@ class ModelUtil:
         self.criterion = self.criterion.to(device)
 
     def _get_data_loader(self, reals, fakes, shuffle=True):
-        reals = torch.stack(reals)
-        fakes = torch.stack(fakes)
+        # reals = torch.stack(reals)
+        # fakes = torch.stack(fakes)
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=shuffle)
         return data_loader
