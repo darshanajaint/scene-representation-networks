@@ -90,7 +90,7 @@ def lin2img(tensor):
 
 def num_divisible_by_2(number):
     i = 0
-    while not number%2:
+    while not number % 2:
         number = number // 2
         i += 1
 

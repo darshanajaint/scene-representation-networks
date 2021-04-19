@@ -61,7 +61,10 @@ class ModelUtil:
             real = real.to(self.device)
             fake = fake.to(self.device)
 
+            print("Calling self.model(real)")
             real_output = self.model(real)
+
+            print("Calling self.model(fake)")
             fake_output = self.model(fake)
             loss = self.get_gan_loss(real_output, fake_output)
 
