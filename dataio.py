@@ -92,7 +92,15 @@ class SceneInstanceDataset():
 class SceneClassDataset(torch.utils.data.Dataset):
     """Dataset for a class of objects, where each datapoint is a SceneInstanceDataset."""
 
-    def __init__(self,
+    def __init__(self, all_instances, num_per_instance_observations, num_instances, instance_dirs, samples_per_instance):
+        self.all_instances = all_instances
+        self.num_instances = num_instances
+        self.num_per_instance_observations = num_per_instance_observations
+        self.instance_dirs = instance_dirs
+        self.samples_per_instance = samples_per_instance
+
+    @classmethod
+    def generate_dataset(cls,
                  root_dir,
                  img_sidelength=None,
                  max_num_instances=-1,
@@ -100,26 +108,56 @@ class SceneClassDataset(torch.utils.data.Dataset):
                  specific_observation_idcs=None,  # For few-shot case: Can pick specific observations only
                  samples_per_instance=2):
 
-        self.samples_per_instance = samples_per_instance
         print(root_dir)
         print(os.path.join(root_dir, "*/"))
-        self.instance_dirs = sorted(glob(os.path.join(root_dir, "*/")))
-        print(self.instance_dirs)
-
-        assert (len(self.instance_dirs) != 0), "No objects in the data directory"
+        instance_dirs = sorted(glob(os.path.join(root_dir, "*/")))
+        print(instance_dirs)
+        print(f'NumInstances {len(instance_dirs)}')
+        assert (len(instance_dirs) != 0), "No objects in the data directory"
 
         if max_num_instances != -1:
-            self.instance_dirs = self.instance_dirs[:max_num_instances]
+            instance_dirs = instance_dirs[:max_num_instances]
 
-        self.all_instances = [SceneInstanceDataset(instance_idx=idx,
+        all_instances = [SceneInstanceDataset(instance_idx=idx,
                                                    instance_dir=dir,
                                                    specific_observation_idcs=specific_observation_idcs,
                                                    img_sidelength=img_sidelength,
                                                    num_images=max_observations_per_instance)
-                              for idx, dir in enumerate(self.instance_dirs)]
+                              for idx, dir in enumerate(instance_dirs)]
 
-        self.num_per_instance_observations = [len(obj) for obj in self.all_instances]
-        self.num_instances = len(self.all_instances)
+        num_per_instance_observations = [len(obj) for obj in all_instances]
+        num_instances = len(all_instances)
+
+        return cls(all_instances, num_per_instance_observations, num_instances, instance_dirs, samples_per_instance)
+
+    @classmethod
+    def generate_batch(cls,
+                     data_root,
+                     num_observations,
+                     num_instances,
+                     img_sidelength=None,
+                     max_num_instances=-1,
+                     max_observations_per_instance=-1,
+                     specific_observation_idcs=None,  # For few-shot case: Can pick specific observations only
+                     samples_per_instance=2 ):
+        instance_dirs = sorted(glob(os.path.join(root_dir, "*/")))
+        sampled_instance_dirs = random.sample(instance_dirs, num_instances)
+
+        num_obsvs = len(os.listdir(os.path.join(sampled_instance_dirs[0], "rgb")))
+
+        all_instances = [SceneInstanceDataset(instance_idx=idx, 
+                                                instance_dir=dir,
+                                                specific_observation_idcs=random.sample(range(num_obsvs), num_observations),
+                                                img_sidelength=img_sidelength,
+                                                num_images=max_observations_per_instance)
+                                for idx, dir in enumerate(sampled_instance_dirs)]
+
+        num_per_instance_observations = [len(obj) for obj in all_instances]
+        num_selected_instances = len(all_instances)
+
+        return cls(all_instances, num_per_instance_observations, num_selected_instances, sampled_instance_dirs, samples_per_instance)
+ 
+
 
     def set_img_sidelength(self, new_img_sidelength):
         """For multi-resolution training: Updates the image sidelength with whichimages are loaded."""

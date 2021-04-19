@@ -98,7 +98,7 @@ def train():
     batch_size_per_sidelength = util.parse_comma_separated_integers(opt.batch_size_per_img_sidelength)
     max_steps_per_sidelength = util.parse_comma_separated_integers(opt.max_steps_per_img_sidelength)
 
-    train_dataset = dataio.SceneClassDataset(root_dir=opt.data_root,
+    train_dataset = dataio.SceneClassDataset.generate_dataset(root_dir=opt.data_root,
                                              max_num_instances=opt.max_num_instances_train,
                                              max_observations_per_instance=opt.max_num_observations_train,
                                              img_sidelength=img_sidelengths[0],
@@ -113,7 +113,7 @@ def train():
     if not opt.no_validation:
         assert (opt.val_root is not None), "No validation directory passed."
 
-        val_dataset = dataio.SceneClassDataset(root_dir=opt.val_root,
+        val_dataset = dataio.SceneClassDataset.generate_dataset(root_dir=opt.val_root,
                                                max_num_instances=opt.max_num_instances_val,
                                                max_observations_per_instance=opt.max_num_observations_val,
                                                img_sidelength=img_sidelengths[0],
