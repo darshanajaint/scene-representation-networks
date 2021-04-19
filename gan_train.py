@@ -209,6 +209,8 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
             reals += list(true_imgs.detach().cpu().numpy())
             batch_iter += 1
 
+        print("Finished generating images")
+
         # Discriminator training
         disc_res = discriminator.train(reals, fakes)
 

@@ -124,7 +124,7 @@ class Raymarcher(nn.Module):
             '''
             depths.append(depth)
 
-        '''
+
         if not self.counter % 100:
             # Write tensorboard summary for each step of ray-marcher.
             drawing_depths = torch.stack(depths, dim=0)[:, 0, :, :]
@@ -139,7 +139,7 @@ class Raymarcher(nn.Module):
             # :].detach().cpu().numpy().squeeze()
             #                         for i in range(batch_size)])
             # log.append(('figure', 'stopping_distances', fig, 100))
-        '''
+
         self.counter += 1
 
         return world_coords[-1], depths[-1], log
