@@ -36,8 +36,8 @@ class ModelUtil:
         self.criterion = self.criterion.to(device)
 
     def _get_data_loader(self, reals, fakes, shuffle=True):
-        reals = torch.from_numpy(np.stack(reals))
-        fakes = torch.from_numpy(np.stack(fakes))
+        reals = torch.stack(reals)
+        fakes = torch.stack(fakes)
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=shuffle)
         return data_loader
@@ -125,15 +125,18 @@ class ModelUtil:
 
         self.model.eval()
 
-        output_list = []
+        proba_list = []
+        pred_list = []
         with torch.no_grad():
             for image, _ in data_loader:
                 image = image.to(self.device)
 
                 output = self.model(image)
                 output = output.cpu().numpy()
+
+                proba_list += list(output)
+
                 output = (output >= 0.5).astype('float')
+                pred_list += list(output)
 
-                output_list += list(output)
-
-        return output_list
+        return proba_list, pred_list
