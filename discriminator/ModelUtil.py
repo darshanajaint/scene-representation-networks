@@ -1,4 +1,5 @@
 import torch
+import math
 import numpy as np
 
 from torch.nn import BCEWithLogitsLoss
@@ -21,11 +22,13 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score
 #   - check project proposal for discriminator evaluation metrics
 #   - evaluation metrics - confusion matrices, precision, recall
 class ModelUtil:
-    def __init__(self, model, transform, device, batch_size=128):
+    def __init__(self, model, transform, device, batch_size=128,
+                 val_proportion=0.1):
         self.model = model
         self.transform = transform
         self.batch_size = batch_size
         self.device = device
+        self.val_proportion = val_proportion
         self.criterion = BCEWithLogitsLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.0001)
 
@@ -33,14 +36,14 @@ class ModelUtil:
         self.criterion = self.criterion.to(device)
 
     def _get_data_loader(self, reals, fakes):
-        reals = torch.Tensor(reals)
-        fakes = torch.Tensor(fakes)
+        reals = torch.from_numpy(np.concatenate(reals))
+        fakes = torch.from_numpy(np.concatenate(fakes))
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=True)
         return data_loader
 
     def set_train(self):
-        for param in self.model.parameters():
+        for param in self.model.linear.parameters():
             param.requires_grad = True
 
     def get_gan_loss(self, real, fake):
@@ -82,8 +85,9 @@ class ModelUtil:
         return loss_per_batch, total_accuracy, real_accuracy, fake_accuracy
 
     def train(self, reals, fakes):
-        train = self._get_data_loader(reals[:-200], fakes[:-200])
-        val = self._get_data_loader(reals[-200:], fakes[-200:])
+        val_size = math.floor(len(reals) * self.val_proportion)
+        train = self._get_data_loader(reals[:-val_size], fakes[:-val_size])
+        val = self._get_data_loader(reals[-val_size:], fakes[-val_size:])
 
         self.set_train()
         self.model.train()

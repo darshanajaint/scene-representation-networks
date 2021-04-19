@@ -80,8 +80,7 @@ class SRNsModel(nn.Module):
 
         if self.freeze_partial:
             all_network_params = (list(self.ray_marcher.parameters())
-                                  + list(self.hyper_phi.parameters())
-                                  + list(self.discriminator.parameters()))
+                                  + list(self.hyper_phi.parameters()))
             for param in all_network_params:
                 param.requires_grad = False
 

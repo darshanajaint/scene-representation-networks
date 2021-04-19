@@ -136,21 +136,23 @@ class SceneClassDataset(torch.utils.data.Dataset):
                      num_observations,
                      num_instances,
                      img_sidelength=None,
-                     max_num_instances=-1,
-                     max_observations_per_instance=-1,
-                     specific_observation_idcs=None,  # For few-shot case: Can pick specific observations only
-                     samples_per_instance=2 ):
-        instance_dirs = sorted(glob(os.path.join(root_dir, "*/")))
+                     max_observations_per_instance=-1, # For few-shot case: Can pick specific observations only
+                     samples_per_instance=2):
+        instance_dirs = sorted(glob(os.path.join(data_root, "*/")))
         sampled_instance_dirs = random.sample(instance_dirs, num_instances)
 
-        num_obsvs = len(os.listdir(os.path.join(sampled_instance_dirs[0], "rgb")))
+        total_observations = len(os.listdir(os.path.join(sampled_instance_dirs[
+                                                           0], "rgb")))
 
-        all_instances = [SceneInstanceDataset(instance_idx=idx, 
-                                                instance_dir=dir,
-                                                specific_observation_idcs=random.sample(range(num_obsvs), num_observations),
-                                                img_sidelength=img_sidelength,
-                                                num_images=max_observations_per_instance)
-                                for idx, dir in enumerate(sampled_instance_dirs)]
+        all_instances = [
+            SceneInstanceDataset(
+                instance_idx=idx,
+                instance_dir=dir,
+                specific_observation_idcs=random.sample(range(total_observations), num_observations),
+                img_sidelength=img_sidelength,
+                num_images=max_observations_per_instance
+            )
+            for idx, dir in enumerate(sampled_instance_dirs)]
 
         num_per_instance_observations = [len(obj) for obj in all_instances]
         num_selected_instances = len(all_instances)

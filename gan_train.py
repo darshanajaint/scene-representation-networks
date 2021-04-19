@@ -95,28 +95,17 @@ p.add_argument('--embedding_size', type=int, default=256,
 opt = p.parse_args()
 
 
-def set_up_srns_model(discriminator, freeze_partial):
-    img_sidelengths = 64
-
-    train_dataset = dataio.SceneClassDataset(
-        root_dir=opt.data_root,
-        max_num_instances=-1,
-        max_observations_per_instance=50,
-        img_sidelength=img_sidelengths,
-        specific_observation_idcs=None,
-        samples_per_instance=1
-    )
-
+def set_up_generator():
     model = SRNsModel(
-        num_instances=train_dataset.num_instances,
+        num_instances=opt.num_instances,
         latent_dim=256,
         has_params=False,
         fit_single_srn=False,
         use_unet_renderer=False,
         tracing_steps=10,
         freeze_networks=False,
-        discriminator=discriminator,
-        freeze_partial=freeze_partial
+        discriminator=None,
+        freeze_partial=True
     )
     
     if opt.checkpoint_path is not None:
@@ -126,7 +115,6 @@ def set_up_srns_model(discriminator, freeze_partial):
                          optimizer=None,
                          overwrite_embeddings=False)
 
-    # TODO: check logging root names for discriminator and generator
     ckpt_dir = os.path.join(opt.logging_root, 'checkpoints')
 
     util.cond_mkdir(opt.logging_root)
@@ -142,78 +130,20 @@ def set_up_srns_model(discriminator, freeze_partial):
     with open(os.path.join(opt.logging_root, "model.txt"), "w") as out_file:
         out_file.write(str(model))
 
-    return model, train_dataset, ckpt_dir
-
-
-def train_generator(model, train_dataset, ckpt_dir):
-    # Parses indices of specific observations from comma-separated list.
-    batch_size = opt.batch_size_per_sidelength
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
-
-    model.train()
-    model.cuda()
-
-    iter = opt.start_step
-
-    print('Beginning training...')
-    print("\n" + "#" * 10)
-    print("Training generator with batch size %d" % batch_size)
-    print("#" * 10 + "\n")
-
-    # Need to instantiate DataLoader every time to set new batch size.
-    train_dataloader = DataLoader(train_dataset,
-                                  batch_size=batch_size,
-                                  shuffle=True,
-                                  drop_last=True,
-                                  collate_fn=train_dataset.collate_fn,
-                                  pin_memory=False)
-
-    # Todo: Implement validation set here
-    batch_num = 0
-    # generated images
-    # ground truths
-    # optimizer.zero_grad()
-    # total_loss = model.get_gan_loss(gen, true)
-    # backward
-    # step
-    for model_input, ground_truth in train_dataloader:
-        model_outputs = model(model_input)
-        optimizer.zero_grad()
-        total_loss = model.get_gan_loss(model_outputs, ground_truth)
-        total_loss.backward()
-        optimizer.step()
-
-        print("Iter %07d   Batch %03d   L_gan %0.4f" %
-              (iter, batch_num, total_loss))
-        batch_num += 1
-
-    iter += 1
-    util.custom_save(model,
-                     os.path.join(ckpt_dir, 'iter_%06d.pth' % iter),
-                     discriminator=None,
-                     optimizer=optimizer)
+    return model, ckpt_dir
 
 
 def set_up_discriminator(device):
     model = get_model(opt.model_type)
     transform = get_transform()
-    model = ModelUtil(model, transform, device, num_epochs=opt.k)
+    model = ModelUtil(model, transform, device)
     return model
-
-
-def train_discriminator(model, train_dataset, ckpt_dir):
-    # 21,120 images in train data set
-    # batch_size = 128
-
-    model.train()
-    return
 
 
 def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
     path = os.path.join(path, 'iter_%04d.pth' % iter)
     state = {
-        'discriminator': disc.state_dict(),
+        'discriminator': disc.model.state_dict(),
         'discriminator_results': disc_results,
         'generator': gen.state_dict(),
         'generator_loss': gen_loss
@@ -224,6 +154,7 @@ def checkpoint(path, iter, disc, disc_results, gen, gen_loss):
 def gan_training(num_iterations, discriminator, generator, gen_optimizer,
                  ckpt_dir):
     generator.train()
+    generator.cuda()
     for iter in range(num_iterations):
         # sample images from test set
         # generate fakes for sample images - fakes = gen_model(samples)
@@ -235,13 +166,29 @@ def gan_training(num_iterations, discriminator, generator, gen_optimizer,
         # gen_loss = formula #2
         # gen_loss.backward, gen_optimizer.step
 
-        samples = [] # data loader
+        samples = dataio.SceneClassDataset.generate_batch(
+            data_root=opt.data_root,
+            num_observations=opt.num_observations,
+            num_instances=opt.num_instances,
+            img_sidelength=opt.img_sidelengths,
+        )
+
+        samples = DataLoader(
+            samples,
+            batch_size=opt.batch_size_per_img_sidelength,
+            shuffle=True,
+            drop_last=True,
+            collate_fn=samples.collate_fn,
+            pin_memory=opt.preload
+        )
+
         fakes = []
         reals = []
         for generator_input, ground_truth in samples:
             generator_output = generator(generator_input)
-            fakes.extend(generator_output.cpu().numpy())
-            reals.extend(ground_truth.cpu().numpy())
+            output_imgs = generator.get_output_img(generator_output)
+            fakes += list(output_imgs.cpu().numpy())
+            reals += list(ground_truth.cpu().numpy())
 
         # Discriminator training
         disc_res = discriminator.train(reals, fakes)
@@ -260,5 +207,11 @@ def gan_training(num_iterations, discriminator, generator, gen_optimizer,
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     discriminator = set_up_discriminator(device)
-    renderer, dataset, ckpt_dir = set_up_srns_model(discriminator, True)
-    
+    generator, ckpt_dir = set_up_generator()
+    optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
+    gan_training(opt.gan_iterations, discriminator, generator, optimizer,
+                 ckpt_dir)
+
+
+if __name__ == "__main__":
+    main()
