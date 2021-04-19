@@ -4,6 +4,7 @@ import numpy as np
 from glob import glob
 import data_util
 import util
+import random
 
 
 def pick(list, item_idcs):
