@@ -36,7 +36,9 @@ class ModelUtil:
         self.criterion = self.criterion.to(device)
 
     def _get_data_loader(self, reals, fakes):
+        print("Creating data loader, reals shape:", reals[0].shape)
         reals = torch.from_numpy(np.concatenate(reals))
+        print("Now in tensor form, reals shape:", reals.shape)
         fakes = torch.from_numpy(np.concatenate(fakes))
         data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=True)
@@ -91,6 +93,7 @@ class ModelUtil:
     def train(self, reals, fakes):
         val_size = math.floor(len(reals) * self.val_proportion)
         train = self._get_data_loader(reals[:-val_size], fakes[:-val_size])
+        return
         val = self._get_data_loader(reals[-val_size:], fakes[-val_size:])
 
         self.set_train()
