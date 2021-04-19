@@ -192,7 +192,8 @@ def train():
                 optimizer.zero_grad()
 
                 dist_loss = model.get_image_loss(model_outputs, ground_truth)
-                reg_loss = model.get_regularization_loss(model_outputs, ground_truth)
+                reg_loss = model.get_regularization_loss(model_outputs,
+                                                         ground_truth)
                 latent_loss = model.get_latent_loss()
 
                 weighted_dist_loss = opt.l1_weight * dist_loss

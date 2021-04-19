@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 class ImageDataset(Dataset):
 
-    def __init__(self, images, labels, transform):
+    def __init__(self, reals, fakes, transform):
         """
             Args:
                 images - iterable of all images
@@ -12,10 +12,15 @@ class ImageDataset(Dataset):
 
             Modified from: https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
         """
-        self.images = images
+        self.reals = reals
+        self.fakes = fakes
         self.transform = transform
-        self.img_list = [[self.transform(self.images[i]), labels[i]] for i in
-                         self.images]
+
+        self.img_list = []
+        for i in range(len(self.reals)):
+            real = self.transform(self.reals[i])
+            fake = self.transform(self.fakes[i])
+            self.img_list.append([real, fake])
 
     def __len__(self):
         return len(self.img_list)

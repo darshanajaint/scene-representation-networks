@@ -34,12 +34,14 @@ def convert_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
 
+
 def write_img(img, path):
     cv2.imwrite(path, img.astype(np.uint8))
 
 
 def in_out_to_param_count(in_out_tuples):
     return np.sum([np.prod(in_out) + in_out[-1] for in_out in in_out_tuples])
+
 
 def parse_intrinsics(filepath, trgt_sidelength=None, invert_y=False):
     # Get camera intrinsics
@@ -78,10 +80,12 @@ def parse_intrinsics(filepath, trgt_sidelength=None, invert_y=False):
 
     return full_intrinsic, grid_barycenter, scale, world2cam_poses
 
+
 def lin2img(tensor):
     batch_size, num_samples, channels = tensor.shape
     sidelen = np.sqrt(num_samples).astype(int)
     return tensor.permute(0,2,1).view(batch_size, channels, sidelen, sidelen)
+
 
 def num_divisible_by_2(number):
     i = 0
@@ -90,6 +94,7 @@ def num_divisible_by_2(number):
         i += 1
 
     return i
+
 
 def cond_mkdir(path):
     if not os.path.exists(path):

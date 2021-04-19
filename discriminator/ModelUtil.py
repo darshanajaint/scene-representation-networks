@@ -21,7 +21,7 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score
 #   - check project proposal for discriminator evaluation metrics
 #   - evaluation metrics - confusion matrices, precision, recall
 class ModelUtil:
-    def __init__(self, model, transform, device, batch_size=128, num_epochs=10):
+    def __init__(self, model, transform, device, batch_size=128):
         self.model = model
         self.transform = transform
         self.batch_size = batch_size
@@ -31,67 +31,88 @@ class ModelUtil:
 
         self.model = self.model.to(device)
         self.criterion = self.criterion.to(device)
-        self.num_epochs = num_epochs
 
-    def _get_data_loader(self, data, labels):
-        data = torch.Tensor(data)
-        labels = torch.Tensor(labels)
-        data_set = ImageDataset(data, labels, self.transform)
+    def _get_data_loader(self, reals, fakes):
+        reals = torch.Tensor(reals)
+        fakes = torch.Tensor(fakes)
+        data_set = ImageDataset(reals, fakes, self.transform)
         data_loader = DataLoader(data_set, self.batch_size, shuffle=True)
         return data_loader
 
+    def set_train(self):
+        for param in self.model.parameters():
+            param.requires_grad = True
+
+    def get_gan_loss(self, real, fake):
+        m = float(len(real))
+        loss = 1 / m * torch.sum(torch.log2(real) + torch.log2(1 - fake))
+        return loss
+
     def _main_loop(self, data_loader, train):
         loss_epoch = 0
-        num_loops = 0
-        preds = []
-        labels = []
+        num_batches = 0
+        real_preds = []
+        fake_preds = []
 
-        for batch in data_loader:
-            image = batch.image.to(self.device)
-            label = batch.label.to(self.device)
+        for real, fake in data_loader:
+            real = real.to(self.device)
+            fake = fake.to(self.device)
 
-            output = self.model(image)
-            loss = self.criterion(output, label)
+            real_output = self.model(real)
+            fake_output = self.model(fake)
+            loss = self.get_gan_loss(real_output, fake_output)
 
             if train:
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
-            preds += list((output.cpu().numpy() >= 0.5).float())
-            labels += list(label.cpu().numpy())
-
+            real_preds.extend((real_output.cpu().numpy() >= 0.5).float)
+            fake_preds.extend((fake_output.cpu().numpy() >= 0.5).float)
             loss_epoch += loss.item()
-            num_loops += 1
-        return loss_epoch / num_loops, accuracy_score(labels, preds), \
-            balanced_accuracy_score(labels, preds)
+            num_batches += 1
 
-    def train(self, train_data, train_labels, val_data, val_labels):
-        train_data_loader = self._get_data_loader(train_data, train_labels)
-        val_data_loader = self._get_data_loader(val_data, val_labels)
+        loss_per_batch = loss_epoch / num_batches
+        total_accuracy = accuracy_score(
+            [1] * len(real_preds) + [0] * len(fake_preds),
+            real_preds + fake_preds
+        )
+        real_accuracy = accuracy_score([1] * len(real_preds), real_preds)
+        fake_accuracy = accuracy_score([0] * len(fake_preds), fake_preds)
+        return loss_per_batch, total_accuracy, real_accuracy, fake_accuracy
 
-        train_loss = []
-        val_loss = []
-        train_acc = []
-        val_acc = []
-        for epoch in range(self.num_epochs):
-            self.model.train()
+    def train(self, reals, fakes):
+        train = self._get_data_loader(reals[:-200], fakes[:-200])
+        val = self._get_data_loader(reals[-200:], fakes[-200:])
 
-            loss, accuracy, balanced_accuracy = self._main_loop(
-                train_data_loader, train=True)
-            train_loss.append(loss)
-            train_acc.append([accuracy, balanced_accuracy])
+        self.set_train()
+        self.model.train()
 
-            self.model.eval()
-            with torch.no_grad():
-                loss, accuracy, balanced_accuracy = self._main_loop(
-                    val_data_loader, train=False)
-                val_loss.append(loss)
-                val_acc.append([accuracy, balanced_accuracy])
+        loss, total, real_acc, fake_acc = self._main_loop(train, train=True)
+        train_loss = loss
+        train_total_acc = total
+        train_real_acc = real_acc
+        train_fake_acc = fake_acc
 
-        train_acc = np.asarray(train_acc)
-        val_acc = np.asarray(val_acc)
-        return [train_acc, train_loss], [val_acc, val_loss]
+        self.model.eval()
+        with torch.no_grad():
+            loss, total, real_acc, fake_acc = self._main_loop(val, train=False)
+            val_loss = total
+            val_total_acc = total
+            val_real_acc = real_acc
+            val_fake_acc = fake_acc
+
+        results = {
+            'train_loss': train_loss,
+            'val_loss': val_loss,
+            'train_total_accuracy': train_total_acc,
+            'val_total_accuracy': val_total_acc,
+            'train_real_accuracy': train_real_acc,
+            'val_real_accuracy': val_real_acc,
+            'train_fake_accuracy': train_fake_acc,
+            'val_fake_accuracy': val_fake_acc
+        }
+        return results
 
     def predict(self, data, labels):
         data_loader = self._get_data_loader(data, labels)

@@ -22,7 +22,9 @@ class SRNsModel(nn.Module):
                  has_params=False,
                  fit_single_srn=False,
                  use_unet_renderer=False,
-                 freeze_networks=False):
+                 freeze_networks=False,
+                 discriminator=None,
+                 freeze_partial=False):
         super().__init__()
 
         self.latent_dim = latent_dim
@@ -34,6 +36,8 @@ class SRNsModel(nn.Module):
         self.sphere_trace_steps = tracing_steps
         self.freeze_networks = freeze_networks
         self.fit_single_srn = fit_single_srn
+        self.discriminator = discriminator
+        self.freeze_partial = freeze_partial
 
         if self.fit_single_srn:  # Fit a single scene with a single SRN (no hypernetworks)
             self.phi = pytorch_prototyping.FCBlock(hidden_ch=self.num_hidden_units_phi,
@@ -69,9 +73,18 @@ class SRNsModel(nn.Module):
         if self.freeze_networks:
             all_network_params = (list(self.pixel_generator.parameters())
                                   + list(self.ray_marcher.parameters())
-                                  + list(self.hyper_phi.parameters()))
+                                  + list(self.hyper_phi.parameters())
+                                  + list(self.discriminator.parameters()))
             for param in all_network_params:
                 param.requires_grad = False
+
+        if self.freeze_partial:
+            all_network_params = (list(self.ray_marcher.parameters())
+                                  + list(self.hyper_phi.parameters())
+                                  + list(self.discriminator.parameters()))
+            for param in all_network_params:
+                param.requires_grad = False
+
 
         # Losses
         self.l2_loss = nn.MSELoss(reduction="mean")
@@ -120,6 +133,20 @@ class SRNsModel(nn.Module):
             self.latent_reg_loss = torch.mean(self.z ** 2)
 
         return self.latent_reg_loss
+
+    def get_gan_loss(self, prediction):
+        """
+        Computes GAN loss on this model.
+        """
+        m = float(len(prediction))
+        loss = 1 / m * torch.sum(torch.log2(1 - self.discriminator.predict(
+            [prediction])[0]))
+        return loss
+
+    def set_discriminator(self, discriminator):
+        self.discriminator = discriminator
+        for param in self.discriminator.parameters():
+            param.requires_grad = False
 
     def get_psnr(self, prediction, ground_truth):
         """Compute PSNR of model image predictions.
