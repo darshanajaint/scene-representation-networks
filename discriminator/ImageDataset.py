@@ -17,11 +17,15 @@ class ImageDataset(Dataset):
         self.fakes = fakes
         self.transform = torch.nn.functional.interpolate
 
-        self.img_list = []
+        reals = self.transform(self.reals, size=(224, 224)) / 255.0
+        fakes = self.transform(self.fakes, size=(224, 224)) / 255.0
+        self.img_list = list(zip(reals, fakes))
+        '''
         for i in range(len(self.reals)):
             real = self.transform(self.reals[i], size=(224, 224)) / 255.0
             fake = self.transform(self.fakes[i], size=(224, 224)) / 255.0
             self.img_list.append([real, fake])
+        '''
 
     def __len__(self):
         return len(self.img_list)
