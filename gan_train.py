@@ -16,14 +16,14 @@ p.add('-c', '--config_filepath', required=False, is_config_file=True,
 
 # Multi-resolution training: Instead of passing only a single value, each of these command-line arguments take comma-
 # separated lists. If no multi-resolution training is required, simply pass single values (see default values).
-p.add_argument('--img_sidelengths', type=str, default='64', required=False,
+p.add_argument('--img_sidelengths', type=int, default='64', required=False,
                help='Progression of image sidelengths.'
                     'If comma-separated list, will train on each sidelength for respective max_steps.'
                     'Images are downsampled to the respective resolution.')
-p.add_argument('--max_steps_per_img_sidelength', type=str, default="200000",
+p.add_argument('--max_steps_per_img_sidelength', type=int, default="200000",
                help='Maximum number of optimization steps.'
                     'If comma-separated list, is understood as steps per image_sidelength.')
-p.add_argument('--batch_size_per_img_sidelength', type=str, default="64",
+p.add_argument('--batch_size_per_img_sidelength', type=int, default="64",
                help='Training batch size.'
                     'If comma-separated list, will train each image sidelength with respective batch size.')
 
