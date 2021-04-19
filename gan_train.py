@@ -197,12 +197,17 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
 
         fakes = []
         reals = []
+        batch_iter = 0
         for generator_input, ground_truth in samples:
             generator_output = generator(generator_input)
+            print("batch_iter {:d}, predictions:".format(batch_iter), end=" ")
             output_imgs = generator.get_output_img(generator_output)
+
+            print("batch_iter {:d}, ground truth:".format(batch_iter), end=" ")
             true_imgs = util.lin2img(ground_truth['rgb'])
             fakes += list(output_imgs.detach().cpu().numpy())
             reals += list(true_imgs.detach().cpu().numpy())
+            batch_iter += 1
 
         # Discriminator training
         disc_res = discriminator.train(reals, fakes)

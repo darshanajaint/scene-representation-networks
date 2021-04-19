@@ -117,10 +117,11 @@ class Raymarcher(nn.Module):
 
             depth = geometry.depth_from_world(world_coords[-1], cam2world)
 
+            '''
             if self.training:
                 print("Raymarch step %d: Min depth %0.6f, max depth %0.6f" %
                       (step, depths[-1].min().detach().cpu().numpy(), depths[-1].max().detach().cpu().numpy()))
-
+            '''
             depths.append(depth)
 
         if not self.counter % 100:
