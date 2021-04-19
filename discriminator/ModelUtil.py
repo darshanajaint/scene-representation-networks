@@ -35,13 +35,13 @@ class ModelUtil:
         self.model = self.model.to(device)
         self.criterion = self.criterion.to(device)
 
-    def _get_data_loader(self, reals, fakes):
+    def _get_data_loader(self, reals, fakes, shuffle=True):
         print("Creating data loader, reals shape:", reals[0].shape)
         reals = torch.from_numpy(np.stack(reals))
         print("Now in tensor form, reals shape:", reals.shape)
         fakes = torch.from_numpy(np.stack(fakes))
         data_set = ImageDataset(reals, fakes, self.transform)
-        data_loader = DataLoader(data_set, self.batch_size, shuffle=True)
+        data_loader = DataLoader(data_set, self.batch_size, shuffle=shuffle)
         return data_loader
 
     def set_train(self):
@@ -125,24 +125,20 @@ class ModelUtil:
         }
         return results
 
-    def predict(self, data, labels):
-        data_loader = self._get_data_loader(data, labels)
+    def predict(self, data):
+        data_loader = self._get_data_loader(data, data, shuffle=False)
 
         self.model.eval()
 
         output_list = []
-        labels_list = []
         with torch.no_grad():
-            for batch in data_loader:
-                image = batch.image.to(self.device)
-                label = batch.label.to(self.device)
+            for image, _ in data_loader:
+                image = image.to(self.device)
 
                 output = self.model(image)
-                output = torch.sigmoid(output)
                 output = output.cpu().numpy()
-                output = (output >= 0.5).float()
+                output = (output >= 0.5).astype('float')
 
-                labels_list += list(label.cpu().numpy())
                 output_list += list(output)
 
-        return output_list, labels_list
+        return output_list
