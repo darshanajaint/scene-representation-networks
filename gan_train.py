@@ -214,14 +214,18 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
             generator_output = generator(generator_input)
             output_imgs = generator.get_output_img(generator_output)
             true_imgs = util.lin2img(ground_truth['rgb'])
-            fakes = output_imgs
+            fakes = output_imgs.clone()
+            fakes = fakes.detach().cpu().numpy()
             # += list(output_imgs)  # .detach().cpu().numpy())
-            reals = true_imgs  # += list(true_imgs)  # .detach().cpu().numpy())
+            reals = true_imgs.clone()
+            reals = reals.detach().cpu().numpy()
+            # += list(true_imgs)  # .detach().cpu().numpy())
 
             # Discriminator training
             disc_res = discriminator.train(reals, fakes)
 
             # Generator training
+            fakes = output_imgs
             gen_optimizer.zero_grad()
             generator.set_discriminator(discriminator)
             gen_loss = generator.get_gan_loss(fakes)
