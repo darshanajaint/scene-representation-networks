@@ -103,9 +103,16 @@ p.add_argument('--model_type', type=str,
                help='One of "mobilenet", "resnet", and "googlenet".')
 p.add_argument('--gan_iterations', type=int, default=100000)
 p.add_argument('--gan_start', type=int, default=0)
+p.add_argument('--gan_checkpoint', type=str, default=None)
 
 
 opt = p.parse_args()
+
+
+def load_model(path, model, model_type):
+    state = torch.load(path)
+    model.load_state_dict(state[model_type])
+    return model
 
 
 def set_up_generator():
@@ -120,8 +127,11 @@ def set_up_generator():
         discriminator=None,
         freeze_partial=True
     )
-    
-    if opt.checkpoint_path is not None:
+
+    if opt.gan_checkpoint is not None:
+        print("Loading from gan checkpoint:", opt.gan_checkpoint)
+        model = load_model(opt.gan_checkpoint, model, "generator")
+    elif opt.checkpoint_path is not None:
         print("Loading model from %s" % opt.checkpoint_path)
         util.custom_load(model, path=opt.checkpoint_path,
                          discriminator=None,
@@ -152,6 +162,9 @@ def set_up_generator():
 
 def set_up_discriminator(device):
     model = get_model(opt.model_type)
+    if opt.gan_checkpoint is not None:
+        print("Loading discriminator from gan checkpoint:", opt.gan_checkpoint)
+        model = load_model(opt.gan_checkpoint, model, "discriminator")
     transform = get_transform()
     model = ModelUtil(model, transform, device)
     return model
