@@ -8,6 +8,9 @@ import dataio
 from torch.utils.data import DataLoader
 from srns import *
 import util
+from gan_train import load_model
+
+from evaluation.evaluation import *
 
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True, help='Path to config file.')
@@ -42,6 +45,7 @@ p.add_argument('--use_unet_renderer', action='store_true',
                help='Whether to use a DeepVoxels-style unet as rendering network or a per-pixel 1x1 convnet')
 p.add_argument('--embedding_size', type=int, default=256,
                help='Dimensionality of latent embedding.')
+p.add_argument('--gan_checkpoint', type=str, default=None)
 
 opt = p.parse_args()
 
@@ -75,9 +79,13 @@ def test():
 
     assert (opt.checkpoint_path is not None), "Have to pass checkpoint!"
 
-    print("Loading model from %s" % opt.checkpoint_path)
-    util.custom_load(model, path=opt.checkpoint_path, discriminator=None,
-                     overwrite_embeddings=False)
+    if opt.gan_checkpoint is not None:
+        print("Loading from gan checkpoint:", opt.gan_checkpoint)
+        model = load_model(opt.gan_checkpoint, model, "generator")
+    elif opt.checkpoint_path is not None:
+        print("Loading model from %s" % opt.checkpoint_path)
+        util.custom_load(model, path=opt.checkpoint_path, discriminator=None,
+                         overwrite_embeddings=False)
 
     model.eval()
     model.cuda()
@@ -97,18 +105,30 @@ def test():
     with torch.no_grad():
         instance_idx = 0
         idx = 0
-        psnrs, ssims = list(), list()
+        psnrs, ssims, fsims = list(), list(), list()
         for model_input, ground_truth in dataset:
             model_outputs = model(model_input)
-            psnr, ssim = model.get_psnr(model_outputs, ground_truth)
+            # psnr, ssim = model.get_psnr(model_outputs, ground_truth)
 
+            psnr = calculate_psnr(ground_truth, model_outputs)
+            ssim = calculate_ssim(ground_truth, model_outputs)
+            fsim = calculate_fsim(ground_truth, model_outputs)
+
+            print("PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
+                psnr, ssim, fsim))
+
+            idx += 1
+            if idx == 200:
+                break
+
+            '''
             psnrs.extend(psnr)
             ssims.extend(ssim)
-
+            fsims.extend(fsim)
             instance_idcs = model_input['instance_idx']
             print("Object instance %d. Running mean PSNR %0.6f SSIM %0.6f" %
                   (instance_idcs[-1], np.mean(psnrs), np.mean(ssims)))
-
+            
             if instance_idx < opt.save_out_first_n:
                 output_imgs = model.get_output_img(model_outputs).cpu().numpy()
                 comparisons = model.get_comparisons(model_input,
@@ -134,11 +154,13 @@ def test():
                     util.write_img(comp, os.path.join(comp_path, "%06d.png" % idx))
 
                     idx += 1
+            '''
+    # with open(os.path.join(opt.logging_root, "results.txt"), "w") as out_file:
+    #     out_file.write("%0.6f, %0.6f" % (np.mean(psnrs), np.mean(ssims)))
 
-    with open(os.path.join(opt.logging_root, "results.txt"), "w") as out_file:
-        out_file.write("%0.6f, %0.6f" % (np.mean(psnrs), np.mean(ssims)))
+    # print("Final mean PSNR %0.6f SSIM %0.6f" % (np.mean(psnrs), np.mean(
+    # ssims)))
 
-    print("Final mean PSNR %0.6f SSIM %0.6f" % (np.mean(psnrs), np.mean(ssims)))
 
 
 def main():
