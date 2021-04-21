@@ -77,7 +77,7 @@ def test():
                       use_unet_renderer=opt.use_unet_renderer,
                       tracing_steps=opt.tracing_steps)
 
-    assert (opt.checkpoint_path is not None), "Have to pass checkpoint!"
+    # assert (opt.checkpoint_path is not None), "Have to pass checkpoint!"
 
     if opt.gan_checkpoint is not None:
         print("Loading from gan checkpoint:", opt.gan_checkpoint)
