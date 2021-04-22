@@ -1,9 +1,9 @@
 # Configuration file for shepard-metzler training (see paper section 4, paragraph 3)
 # Datasets can be downloaded here: https://drive.google.com/drive/folders/1OkYgeRcIcLOFu1ft5mRODWNQaPJ0ps90
 
-data_root: ./data/shepard_metzler_train/ # Path to shepard-metzler training dataset.
-val_root: ./data/shepard_metzler_train_val/ # Path to shepard-metzler dataset, consisting of the same cars as in the training set, but with novel camera views.
-logging_root: ./logs/shepard_metzler
+data_root: ./data/shepard_metzler_train_test/ # Path to shepard-metzler training dataset.
+val_root:  # Path to shepard-metzler dataset, consisting of the same cars as in the training set, but with novel camera views.
+logging_root: ./gan_logs/shepard_metzler
 img_sidelengths: 64
 batch_size_per_img_sidelength: 30 # (48 for 48 GB GPU) This is for a GPU with
   # 48 GB of memory. Adapt accordingly for your GPU memory.
