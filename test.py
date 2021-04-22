@@ -117,13 +117,13 @@ def test():
 
             orig = np.squeeze(orig, axis=0)
             pred = np.squeeze(pred, axis=0)
-            print(orig.shape, pred.shape)
+
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
             fsim = calculate_fsim(orig, pred)
 
-            print("PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
-                psnr, ssim, fsim))
+            print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
+                idx, psnr, ssim, fsim))
 
             idx += 1
             if idx == 200:
