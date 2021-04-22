@@ -110,9 +110,12 @@ def test():
             model_outputs = model(model_input)
             # psnr, ssim = model.get_psnr(model_outputs, ground_truth)
 
-            psnr = calculate_psnr(ground_truth, model_outputs)
-            ssim = calculate_ssim(ground_truth, model_outputs)
-            fsim = calculate_fsim(ground_truth, model_outputs)
+            orig = ground_truth.detach().cpu().numpy()
+            pred = model_outputs.detach().cpu().numpy()
+
+            psnr = calculate_psnr(orig, pred)
+            ssim = calculate_ssim(orig, pred)
+            fsim = calculate_fsim(orig, pred)
 
             print("PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
                 psnr, ssim, fsim))
