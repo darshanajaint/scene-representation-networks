@@ -110,8 +110,8 @@ def test():
             model_outputs = model(model_input)
             # psnr, ssim = model.get_psnr(model_outputs, ground_truth)
 
-            orig = ground_truth['rgb'].detach().cpu().numpy()
-            pred = model_outputs[0].detach().cpu().numpy()
+            orig = model.get_output_img((ground_truth['rgb'], ""))
+            pred = model.get_output_img(model_outputs)
 
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
