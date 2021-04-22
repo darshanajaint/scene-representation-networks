@@ -58,7 +58,7 @@ def test():
     else:
         specific_observation_idcs = None
 
-    dataset = dataio.SceneClassDataset.generate_datset(root_dir=opt.data_root,
+    dataset = dataio.SceneClassDataset.generate_dataset(root_dir=opt.data_root,
                                        max_num_instances=opt.max_num_instances,
                                        specific_observation_idcs=specific_observation_idcs,
                                        max_observations_per_instance=-1,
