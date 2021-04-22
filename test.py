@@ -46,10 +46,21 @@ p.add_argument('--use_unet_renderer', action='store_true',
 p.add_argument('--embedding_size', type=int, default=256,
                help='Dimensionality of latent embedding.')
 p.add_argument('--gan_checkpoint', type=str, default=None)
+p.add_argument('--model_type', type=str)
 
 opt = p.parse_args()
 
 device = torch.device('cuda')
+
+
+def write_eval(index, path, psnr, ssim, fsim):
+    state = {
+        'psnr': psnr,
+        'ssim': ssim,
+        'fsim': fsim
+    }
+    path = path + '/index_{:d}.pth'.format(index)
+    torch.save(state, path)
 
 
 def test():
@@ -97,13 +108,15 @@ def test():
     util.cond_mkdir(gt_comparison_dir)
     util.cond_mkdir(renderings_dir)
 
+    eval_path = os.path.join(opt.logging_root, opt.model_type)
+    util.cond_mkdir(eval_path)
+
     # Save command-line parameters to log directory.
     with open(os.path.join(opt.logging_root, "params.txt"), "w") as out_file:
         out_file.write('\n'.join(["%s: %s" % (key, value) for key, value in vars(opt).items()]))
 
     print('Beginning evaluation...')
     with torch.no_grad():
-        instance_idx = 0
         idx = 0
         psnrs, ssims, fsims = list(), list(), list()
         for model_input, ground_truth in dataset:
@@ -122,12 +135,18 @@ def test():
             ssim = calculate_ssim(orig, pred)
             fsim = calculate_fsim(orig, pred)
 
+            psnrs.append(psnr)
+            ssims.append(ssim)
+            fsims.append(fsim)
+
             print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
                 idx, psnr, ssim, fsim))
 
             idx += 1
-            if idx == 200:
-                break
+            if idx % 500 == 0:
+                write_eval(idx, eval_path, psnrs, ssims, fsims)
+                psnrs, ssims, fsims = list(), list(), list()
+                idx = 0
 
             '''
             psnrs.extend(psnr)
