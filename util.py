@@ -87,6 +87,12 @@ def lin2img(tensor):
     return tensor.permute(0, 2, 1).view(batch_size, channels, sidelen, sidelen)
 
 
+def channel_last(tensor):
+    batch_size, num_samples, channels = tensor.shape
+    sidelen = np.sqrt(num_samples).astype(int)
+    return tensor.view(batch_size, sidelen, sidelen, channels)
+
+
 def num_divisible_by_2(number):
     i = 0
     while not number % 2:

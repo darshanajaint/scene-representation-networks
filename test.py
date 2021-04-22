@@ -109,9 +109,11 @@ def test():
         for model_input, ground_truth in dataset:
             model_outputs = model(model_input)
             # psnr, ssim = model.get_psnr(model_outputs, ground_truth)
+            orig = util.channel_last(ground_truth['rgb'])
+            pred = util.channel_last(model_outputs[0])
 
-            orig = model.get_output_img((ground_truth['rgb'], ""))
-            pred = model.get_output_img(model_outputs)
+            orig = orig.detach().cpu().numpy()
+            pred = pred.detach().cpu().numpy()
             print(orig.shape, pred.shape)
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
