@@ -112,7 +112,7 @@ def test():
 
             orig = model.get_output_img((ground_truth['rgb'], ""))
             pred = model.get_output_img(model_outputs)
-
+            print(orig.shape, pred.shape)
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
             fsim = calculate_fsim(orig, pred)
