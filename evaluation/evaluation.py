@@ -15,7 +15,7 @@ def calculate_psnr(orig, test):
 
 
 def calculate_ssim(orig, test):
-    return structural_similarity(orig, test)
+    return structural_similarity(orig, test, multichannel=True)
 
 
 def calculate_fsim(orig, test):
