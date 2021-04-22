@@ -116,6 +116,9 @@ def test():
             orig = orig.detach().cpu().numpy()
             pred = pred.detach().cpu().numpy()
 
+            orig = np.squeeze(orig, axis=0)
+            pred = np.squeeze(pred, axis=0)
+
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
             fsim = calculate_fsim(orig, pred)
