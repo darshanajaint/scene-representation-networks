@@ -146,7 +146,7 @@ def test():
             if idx % 500 == 0:
                 write_eval(idx, eval_path, psnrs, ssims, fsims)
                 psnrs, ssims, fsims = list(), list(), list()
-                idx = 0
+                # idx = 0
 
             '''
             psnrs.extend(psnr)
