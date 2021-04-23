@@ -59,7 +59,9 @@ def write_eval(index, path, psnr, ssim, fsim):
         'ssim': ssim,
         'fsim': fsim
     }
-    path = path + '/index_{:d}.pth'.format(index)
+    path = path + '/index_{:06d}.pth'.format(index)
+
+    print("Writing model with index {:d} to {:s}".format(index, path))
     torch.save(state, path)
 
 
@@ -139,8 +141,8 @@ def test():
             ssims.append(ssim)
             fsims.append(fsim)
 
-            print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
-                idx, psnr, ssim, fsim))
+            # print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
+            #     idx, psnr, ssim, fsim))
 
             idx += 1
             if idx % 500 == 0:
