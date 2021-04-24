@@ -264,7 +264,7 @@ def make_predictions(discriminator, generator, results_dir):
         specific_observation_idcs=opt.specific_observation_idcs,
         max_observations_per_instance=-1,
         samples_per_instance=1,
-        img_sidelength=opt.img_sidelength
+        img_sidelength=opt.img_sidelengths
     )
 
     data_loader = DataLoader(
