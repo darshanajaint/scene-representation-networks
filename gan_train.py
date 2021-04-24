@@ -252,6 +252,52 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
                    generator, running_loss / batch_iter)
 
 
+def save_predictions(path, pred, idx):
+    path = path + '/iter_{:d}.pth'.format(idx)
+    torch.save(pred, path)
+
+
+def make_predictions(discriminator, generator, results_dir):
+    dataset = dataio.SceneClassDataset.generate_dataset(
+        root_dir=opt.data_root,
+        max_num_instances=opt.max_num_instances,
+        specific_observation_idcs=opt.specific_observation_idcs,
+        max_observations_per_instance=-1,
+        samples_per_instance=1,
+        img_sidelength=opt.img_sidelength
+    )
+
+    data_loader = DataLoader(
+        dataset,
+        collate_fn=dataset.collate_fn,
+        batch_size=1,
+        shuffle=False,
+        drop_last=False
+    )
+
+    with torch.no_grad():
+        discriminator.eval()
+        generator.eval()
+
+        idx = 0
+        predictions = list()
+        for gen_input, ground_truth in data_loader:
+            gen_output = generator(gen_input)
+
+            # get images
+            fake = generator.get_output_img(gen_output)
+            real = util.lin2img(ground_truth['rgb'])
+
+            # run through discriminator
+            result = discriminator.predict_proba(real, fake)
+            predictions.append(result)
+
+            # save discriminator results
+            if idx % 500 == 0:
+                save_predictions(results_dir, predictions, idx)
+                predictions = list()
+
+
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     discriminator = set_up_discriminator(device)

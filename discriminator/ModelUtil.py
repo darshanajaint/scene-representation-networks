@@ -140,3 +140,9 @@ class ModelUtil:
             pred_list += list(output)
 
         return proba_list, pred_list
+
+    def predict_proba(self, real, fake):
+        self.model.eval()
+        real_pred = self.model(real)
+        fake_pred = self.model(fake)
+        return [real_pred, fake_pred]
