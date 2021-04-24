@@ -277,6 +277,7 @@ def make_predictions(discriminator, generator, results_dir):
 
     with torch.no_grad():
         generator.eval()
+        generator.cuda()
 
         idx = 0
         predictions = list()
