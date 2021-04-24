@@ -302,9 +302,11 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     discriminator = set_up_discriminator(device)
     generator, models_dir, results_dir = set_up_generator()
-    optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
-    gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
-                 optimizer, models_dir, results_dir)
+    results_dir = opt.logging_root
+    # optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
+    # gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
+    #              optimizer, models_dir, results_dir)
+    make_predictions(discriminator, generator, results_dir)
 
 
 if __name__ == "__main__":
