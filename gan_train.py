@@ -260,7 +260,7 @@ def save_predictions(path, pred, idx):
 def make_predictions(discriminator, generator, results_dir):
     dataset = dataio.SceneClassDataset.generate_dataset(
         root_dir=opt.data_root,
-        max_num_instances=opt.max_num_instances,
+        max_num_instances=opt.max_num_instances_train,
         specific_observation_idcs=opt.specific_observation_idcs,
         max_observations_per_instance=-1,
         samples_per_instance=1,
