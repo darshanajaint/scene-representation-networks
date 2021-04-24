@@ -276,7 +276,6 @@ def make_predictions(discriminator, generator, results_dir):
     )
 
     with torch.no_grad():
-        discriminator.eval()
         generator.eval()
 
         idx = 0
