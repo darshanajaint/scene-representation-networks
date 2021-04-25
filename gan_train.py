@@ -290,13 +290,16 @@ def make_predictions(discriminator, generator, results_dir):
 
             # run through discriminator
             result = discriminator.predict_proba(real, fake)
-            predictions.append(result)
+            # predictions.append(result)
 
             # save discriminator results
+            print(result)
             idx += 1
-            if idx % 500 == 0:
-                save_predictions(results_dir, predictions, idx)
-                predictions = list()
+            if idx == 20:
+                break
+            # if idx % 500 == 0:
+            #     save_predictions(results_dir, predictions, idx)
+            #     predictions = list()
 
 
 def main():

@@ -137,18 +137,20 @@ def test():
             ssim = calculate_ssim(orig, pred)
             fsim = calculate_fsim(orig, pred)
 
-            psnrs.append(psnr)
-            ssims.append(ssim)
-            fsims.append(fsim)
+            # psnrs.append(psnr)
+            # ssims.append(ssim)
+            # fsims.append(fsim)
 
-            # print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
-            #     idx, psnr, ssim, fsim))
+            print("{:d}. PSNR: {:0.6f}; SSIM: {:0.6f}; FSIM: {:0.6f}".format(
+                idx, psnr, ssim, fsim))
 
             idx += 1
-            if idx % 500 == 0:
-                write_eval(idx, eval_path, psnrs, ssims, fsims)
-                psnrs, ssims, fsims = list(), list(), list()
-                # idx = 0
+            if idx == 20:
+                break
+            # if idx % 500 == 0:
+            #     write_eval(idx, eval_path, psnrs, ssims, fsims)
+            #     psnrs, ssims, fsims = list(), list(), list()
+            #     # idx = 0
 
             '''
             psnrs.extend(psnr)
