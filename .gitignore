@@ -1,6 +1,7 @@
 # Data and logs folders
 ./data
 ./logs
+./gan_logs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
