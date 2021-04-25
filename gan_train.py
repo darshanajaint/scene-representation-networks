@@ -9,6 +9,8 @@ from srns import *
 from torch.utils.data import DataLoader
 from discriminator.util import *
 from discriminator.ModelUtil import ModelUtil
+from evaluation.evaluation import *
+from test import save_imgs, write_eval
 
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True,
@@ -252,9 +254,25 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
                    generator, running_loss / batch_iter)
 
 
-def save_predictions(path, pred, idx):
+def save_results(idx, path, psnrs, ssims, fsims, predictions, originals,
+                 generated):
+    state = {
+        'original_image': originals,
+        'generated_image': generated,
+        'discriminator_prediction': predictions,
+        'psnr': psnrs,
+        'ssim': ssims,
+        'fsim': fsims
+    }
     path = path + '/iter_{:06d}.pth'.format(idx)
-    torch.save(pred, path)
+    torch.save(state, path)
+
+
+def modify_image(image):
+    image = util.channel_last(image)
+    image = image.detach().cpu().numpy()
+    image = np.squeeze(image, axis=0)
+    return image
 
 
 def make_predictions(discriminator, generator, results_dir):
@@ -280,26 +298,42 @@ def make_predictions(discriminator, generator, results_dir):
         generator.cuda()
 
         idx = 0
-        predictions = list()
+        psnrs, ssims, fsims = list(), list(), list()
+        predictions, originals, generated = list(), list(), list()
         for gen_input, ground_truth in data_loader:
             gen_output = generator(gen_input)
 
-            # get images
+            # Get discriminator probabilities - result = [real, fake]
             fake = generator.get_output_img(gen_output)
             real = util.lin2img(ground_truth['rgb'])
-
-            # run through discriminator
             result = discriminator.predict_proba(real, fake)
-            # predictions.append(result)
 
-            # save discriminator results
-            print(result)
+            # Calculate numpy images and image metrics
+            orig = modify_image(ground_truth['rgb'])
+            pred = modify_image(gen_output[0])
+
+            psnr = calculate_psnr(orig, pred)
+            ssim = calculate_ssim(orig, pred)
+            fsim = calculate_fsim(orig, pred)
+
+            # Append all results to respective lists
+            predictions.append(result)
+            originals.append(orig)
+            generated.append(pred)
+            psnrs.append(psnr)
+            ssims.append(ssim)
+            fsims.append(fsim)
+
+            # Save results every 20 iterations
             idx += 1
-            if idx == 20:
+            if idx % 20 == 0:
+                save_results(idx, results_dir, psnrs, ssims, fsims,
+                             predictions, originals, generated)
+                psnrs, ssims, fsims = list(), list(), list()
+                predictions, originals, generated = list(), list(), list()
+
+            if idx == 100:
                 break
-            # if idx % 500 == 0:
-            #     save_predictions(results_dir, predictions, idx)
-            #     predictions = list()
 
 
 def main():
