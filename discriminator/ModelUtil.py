@@ -48,7 +48,7 @@ class ModelUtil:
 
     def get_gan_loss(self, real, fake):
         m = float(len(real))
-        loss = 1 / m * torch.sum(torch.log2(real) + torch.log2(1 - fake))
+        loss = - 1 / m * torch.sum(torch.log2(real) + torch.log2(1 - fake))
         return loss
 
     def _main_loop(self, data_loader, train):
