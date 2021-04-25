@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader
 from discriminator.util import *
 from discriminator.ModelUtil import ModelUtil
 from evaluation.evaluation import *
-from test import save_imgs, write_eval
 
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True,
