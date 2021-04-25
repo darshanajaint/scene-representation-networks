@@ -65,6 +65,14 @@ def write_eval(index, path, psnr, ssim, fsim):
     torch.save(state, path)
 
 
+def save_imgs(orig, pred, path, idx):
+    state = {
+        'original': orig,
+        'predicted': pred
+    }
+    torch.save(state, path + '/iter_{:02d}.pth'.format(idx))
+
+
 def test():
     if opt.specific_observation_idcs is not None:
         specific_observation_idcs = list(map(int, opt.specific_observation_idcs.split(',')))
@@ -132,6 +140,8 @@ def test():
 
             orig = np.squeeze(orig, axis=0)
             pred = np.squeeze(pred, axis=0)
+
+            save_imgs(orig, pred, eval_path, idx)
 
             psnr = calculate_psnr(orig, pred)
             ssim = calculate_ssim(orig, pred)
