@@ -253,7 +253,7 @@ def gan_training(start, num_iterations, discriminator, generator, gen_optimizer,
 
 
 def save_predictions(path, pred, idx):
-    path = path + '/iter_{:d}.pth'.format(idx)
+    path = path + '/iter_{:06d}.pth'.format(idx)
     torch.save(pred, path)
 
 
@@ -293,6 +293,7 @@ def make_predictions(discriminator, generator, results_dir):
             predictions.append(result)
 
             # save discriminator results
+            idx += 1
             if idx % 500 == 0:
                 save_predictions(results_dir, predictions, idx)
                 predictions = list()
