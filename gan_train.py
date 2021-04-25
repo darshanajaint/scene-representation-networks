@@ -345,7 +345,8 @@ def main():
     # optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
     # gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
     #              optimizer, models_dir, results_dir)
-    results_dir = opt.logging_root
+
+    results_dir = os.path.join(opt.logging_root, opt.model_type)
     make_predictions(discriminator, generator, results_dir)
 
 
