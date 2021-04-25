@@ -175,6 +175,7 @@ def set_up_discriminator(device):
 def checkpoint(models_dir, results_dir, iter, disc, disc_results, gen,
                gen_loss):
     models_path = models_dir + '/iter_{:06d}.pth'.format(iter)
+    print("Saving model to:", models_path)
     models = {
         'discriminator': disc.model.state_dict(),
         'generator': gen.state_dict()
@@ -182,6 +183,7 @@ def checkpoint(models_dir, results_dir, iter, disc, disc_results, gen,
     torch.save(models, models_path)
 
     results_path = results_dir + '/iter_{:06d}.pth'.format(iter)
+    print("Saving results to:", results_path)
     results = {
         'discriminator': disc_results,
         'generator': gen_loss
@@ -340,10 +342,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     discriminator = set_up_discriminator(device)
     generator, models_dir, results_dir = set_up_generator()
-    results_dir = opt.logging_root
     # optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr)
     # gan_training(opt.gan_start, opt.gan_iterations, discriminator, generator,
     #              optimizer, models_dir, results_dir)
+    results_dir = opt.logging_root
     make_predictions(discriminator, generator, results_dir)
 
 
