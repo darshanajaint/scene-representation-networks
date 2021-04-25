@@ -143,8 +143,8 @@ class ModelUtil:
 
     def predict_proba(self, real, fake):
         self.model.eval()
-        real.to(self.device)
-        fake.to(self.device)
+        real = real.to(self.device)
+        fake = fake.to(self.device)
         real_pred = self.model(real)
         fake_pred = self.model(fake)
         return [real_pred, fake_pred]
