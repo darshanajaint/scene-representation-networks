@@ -327,14 +327,11 @@ def make_predictions(discriminator, generator, results_dir):
 
             # Save results every 20 iterations
             idx += 1
-            if idx % 20 == 0:
+            if idx % 500 == 0:
                 save_results(idx, results_dir, psnrs, ssims, fsims,
                              predictions, originals, generated)
                 psnrs, ssims, fsims = list(), list(), list()
                 predictions, originals, generated = list(), list(), list()
-
-            if idx == 100:
-                break
 
 
 def main():
